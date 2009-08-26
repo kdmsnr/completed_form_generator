@@ -35,24 +35,25 @@ end
 def image_src(user)
   case user
   when "akr"
-    image_src = "images/akr.jpg"
+    image = "images/akr.jpg"
   when "_why"
-    image_src = "images/_why.jpg"
+    image = "images/_why.jpg"
   when "_ko1"
-    image_src = "images/_ko1.jpg"
+    image = "images/_ko1.jpg"
   when "takahashim"
-    image_src = "images/takahashim.jpg"
+    image = "images/takahashim.jpg"
   when "yukihiro_matz"
-    image_src = "images/matz.jpg"
+    image = "images/matz.jpg"
   else
     begin
       twitter = Hpricot(open("http://twitter.com/#{user}"))
-      image_src = (twitter/"img#profile-image").map{|e| e['src'] }.first
+      image = (twitter/"img#profile-image").map{|e| e['src'] }.first
+      image = "images/twitter_bigger.png" if image.empty?
     rescue
-      image_src = "images/twitter_bigger.png"
+      image = "images/twitter_bigger.png"
     end
   end
-  URI.encode(image_src)
+  URI.encode(image)
 end
 
 def generate(result, user, opt)
