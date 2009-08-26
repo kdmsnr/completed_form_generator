@@ -7,62 +7,64 @@ require 'open-uri'
 
 include Magick
 
-RIDERS = %w(decade hibiki kabuto denou kiva kuga agito ryuki fives blade)
+RIDERS = %w(decade hibiki kabuto den_o kiva kuuga agito ryuki faiz blade)
+CARD_X = 43.0
+CARD_Y = 55.0
 
 Card = Struct.new(:x, :y, :resized_x, :resized_y, :angle)
 cards = {
-  :decade => Card.new(556, 163, 50, 74, -1.5),
+  :decade => Card.new(564, 171, CARD_X-1, CARD_Y, -2.5),
 
-  :hibiki => Card.new(391, 430, 33, 67, 14),
-  :kabuto => Card.new(426, 440, 35, 67, 13),
-  :denou => Card.new(465, 447, 35, 70, 13),
-  :kiva =>   Card.new(503, 454, 43, 70, 13),
+  :hibiki => Card.new(402, 432, CARD_X-18, CARD_Y, 13.6),
+  :kabuto => Card.new(434, 440, CARD_X-14, CARD_Y, 14),
+  :den_o =>  Card.new(475, 447, CARD_X-14, CARD_Y, 13.4),
+  :kiva =>   Card.new(514, 454, CARD_X-10, CARD_Y, 13.4),
 
-  :kuga =>   Card.new(560, 461, 50, 73, 0),
+  :kuuga =>  Card.new(567, 460, CARD_X, CARD_Y, 0),
 
-  :agito =>  Card.new(613, 448, 53, 72, -11),
-  :ryuki =>  Card.new(669, 436, 51, 72, -12),
-  :fives =>  Card.new(730, 426, 49, 71, -12),
-  :blade =>  Card.new(782, 415, 50, 71, -13)
+  :agito =>  Card.new(622, 448, CARD_X, CARD_Y, -12),
+  :ryuki =>  Card.new(676, 436, CARD_X, CARD_Y, -12),
+  :faiz =>   Card.new(737, 428, CARD_X, CARD_Y, -10.3),
+  :blade =>  Card.new(790, 419, CARD_X, CARD_Y, -10.3)
 }
 
 def decade
   ImageList.new('images/decade.jpg')
 end
 
+def image_src(user)
+  case user
+  when "akr"
+    image_src = "images/akr.jpg"
+  when "_why"
+    image_src = "images/_why.jpg"
+  when "_ko1"
+    image_src = "images/_ko1.jpg"
+  when "takahashim"
+    image_src = "images/takahashim.jpg"
+  when "yukihiro_matz"
+    image_src = "images/matz.jpg"
+  else
+    begin
+      twitter = Hpricot(open("http://twitter.com/#{user}"))
+      image_src = (twitter/"img#profile-image").map{|e| e['src'] }.first
+    rescue
+      image_src = "images/twitter_bigger.png"
+    end
+  end
+  URI.encode(image_src)
+end
+
 def generate(result, user, opt)
   return result if user.empty?
 
-  begin
-    case user
-    when "akr"
-      image_url = "images/akr.jpg"
-    when "_why"
-      image_url = "images/_why.jpg"
-    when "_ko1"
-      image_url = "images/_ko1.jpg"
-    when "takahashim"
-      image_url = "images/takahashim.jpg"
-    when "yukihiro_matz"
-      image_url = "images/matz.jpg"
-    else
-      twitter = Hpricot(open("http://twitter.com/#{user}"))
-      image = (twitter/"img#profile-image").map{|e| e['src'] }
-      if image.empty?
-        image_url = "images/twitter_bigger.png"
-      else
-        image_url = image.first
-      end
-    end
-
-    src = ImageList.new(URI.encode(image_url)) {
-      self.background_color = "none"
-    }
-    src.resize_to_fill!(opt.resized_x, opt.resized_y).rotate!(opt.angle)
-    result = result.composite(src, opt.x, opt.y, OverCompositeOp)
-  rescue
-    result
-  end
+  src = ImageList.new(image_src(user)) {
+    self.background_color = "none"
+  }
+  src.resize_to_fill!(CARD_X, CARD_Y).
+    resize!(opt.resized_x, opt.resized_y).
+    rotate!(opt.angle)
+  result = result.composite(src, opt.x, opt.y, OverCompositeOp)
 end
 
 get '/' do
@@ -78,5 +80,5 @@ post '/' do
   end
 
   content_type :jpg
-  send_data result.to_blob
+  return result.to_blob
 end
