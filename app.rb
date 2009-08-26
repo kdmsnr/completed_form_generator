@@ -16,7 +16,7 @@ cards = {
   :decade => Card.new(564, 171, CARD_X-1, CARD_Y, -2.5),
 
   :hibiki => Card.new(402, 432, CARD_X-18, CARD_Y, 13.6),
-  :kabuto => Card.new(434, 440, CARD_X-14, CARD_Y, 14),
+  :kabuto => Card.new(434, 440, CARD_X-14, CARD_Y, 13.6),
   :den_o =>  Card.new(475, 447, CARD_X-14, CARD_Y, 13.4),
   :kiva =>   Card.new(514, 454, CARD_X-10, CARD_Y, 13.4),
 
