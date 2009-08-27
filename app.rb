@@ -79,6 +79,14 @@ def generate(result, user, opt)
   result = result.composite(src, opt.x, opt.y, OverCompositeOp)
 end
 
+def clean
+  Dir.glob("public/result/*") do |f|
+    if File.mtime(f) < (Time.now - 60*60)
+      File.delete(f)
+    end
+  end
+end
+
 get '/' do
   erb :index
 end
@@ -91,6 +99,16 @@ post '/' do
     result = generate(result, params[k], v)
   end
 
-  content_type :jpg
-  return result.to_blob
+  fname = Time.new.to_f
+  File.open("public/result/#{fname}.jpg", "w") do |f|
+    f.write(result.to_blob)
+  end
+  Thread.new{clean}
+
+  redirect "/result/#{fname}"
+end
+
+get '/result/:fname' do
+  @fname = params[:fname]
+  erb :result
 end
