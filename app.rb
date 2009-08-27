@@ -107,11 +107,15 @@ def image_src(user)
   URI.encode(image)
 end
 
+def h(str)
+  Rack::Utils.escape_html(str)
+end
+
 get '/' do
   erb :index
 end
 
-post '/' do
+post '/photo' do
   filter = %w(decade hibiki kabuto den_o kiva kuuga agito ryuki faiz blade)
   params.delete_if {|k, v| !filter.include?(k.to_s) }
 
@@ -128,13 +132,24 @@ post '/' do
   redirect "/show/#{image.id}"
 end
 
-delete '/:id' do
+delete '/photo/:id' do
   begin
     Photo.get!(params[:id]).destroy
   ensure
     redirect '/list'
   end
 end
+
+get '/photo/:id' do
+  begin
+    image = Photo.get!(params[:id])
+    content_type :jpg
+    return decode64(image.body)
+  rescue
+    raise Sinatra::NotFound
+  end
+end
+
 
 get '/show/:id' do
   begin
@@ -152,15 +167,5 @@ get '/list' do
     @ids << photo.id
   end
   erb :list
-end
-
-get '/photo/:id' do
-  begin
-    image = Photo.get!(params[:id])
-    content_type :jpg
-    return decode64(image.body)
-  rescue
-    raise Sinatra::NotFound
-  end
 end
 

@@ -1,7 +1,7 @@
 <p>1時間ぐらい保存される予定。早くReblogしよう。</p>
-<p><img src="/photo/<%=Rack::Utils.escape_html( @id )%>" alt="completed_form" /></p>
+<p><img src="/photo/<%=h @id %>" alt="completed_form" /></p>
 
-<form method="post" action="/<%=Rack::Utils.escape_html( @id )%>" class="button-to">
+<form method="post" action="/photo/<%=h @id %>" class="button-to">
   <div>
     <input type="hidden" name="_method" value="delete" />
     <input onclick="return confirm('削除しますか？');"
