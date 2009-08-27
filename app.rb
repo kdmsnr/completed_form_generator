@@ -61,7 +61,7 @@ def generate(result, user, opt)
 
   src = ImageList.new(image_src(user)) {
     self.background_color = "none"
-  }
+  }.first
   src.resize_to_fill!(CARD_X, CARD_Y).
     resize!(opt.resized_x, opt.resized_y).
     rotate!(opt.angle)
