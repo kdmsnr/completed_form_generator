@@ -19,16 +19,20 @@
         height:30px;
         font-size:120%;
       }
+      .button-to, .button-to > div {
+        display: inline;
+      }
     </style>
   </head>
   <body>
     <h1><a href="/">completed form generator</a></h1>
     <%= yield %>
-    <p>
-      <a href="http://twitter.com/?status=@kdmsnr%20">お問い合せ via twitter</a>
-    </p>
-    <p>
-      <a href="http://github.com/kdmsnr/completed_form_generator/tree/master">ソースはこちら</a>
-    </p>
+
+    <hr />
+
+    <a href="/">HOME</a> |
+    <a href="/list">一覧</a> |
+    <a href="http://twitter.com/?status=@kdmsnr%20">お問い合せ via twitter</a> |
+    <a href="http://github.com/kdmsnr/completed_form_generator/tree/master">ソースはこちら</a>
   </body>
 </html>

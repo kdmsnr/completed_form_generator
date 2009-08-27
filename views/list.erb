@@ -1,0 +1,14 @@
+<ul>
+<% @ids.each do |id| %>
+  <li>
+    <a href="/show/<%= id %>"><%= id %></a>
+    <form method="post" action="/<%= id %>" class="button-to">
+      <div>
+        <input type="hidden" name="_method" value="delete" />
+        <input onclick="return confirm('削除しますか？');"
+               value="削除" type="submit" />
+      </div>
+    </form>
+  </li>
+<% end %>
+</ul>

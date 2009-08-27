@@ -128,6 +128,14 @@ post '/' do
   redirect "/show/#{image.id}"
 end
 
+delete '/:id' do
+  begin
+    Photo.get!(params[:id]).destroy
+  ensure
+    redirect '/list'
+  end
+end
+
 get '/show/:id' do
   begin
     image = Photo.get!(params[:id])
@@ -136,6 +144,14 @@ get '/show/:id' do
   rescue
     raise Sinatra::NotFound
   end
+end
+
+get '/list' do
+  @ids = []
+  Photo.all(:order => [:id.desc]).each do |photo|
+    @ids << photo.id
+  end
+  erb :list
 end
 
 get '/photo/:id' do
@@ -147,3 +163,4 @@ get '/photo/:id' do
     raise Sinatra::NotFound
   end
 end
+
