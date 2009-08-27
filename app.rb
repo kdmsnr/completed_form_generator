@@ -5,13 +5,25 @@ require 'RMagick'
 require 'hpricot'
 require 'open-uri'
 require 'lib/my_magick' # for RMagick 1.x
+require 'dm-core'
+require 'base64'
 
 include Magick
+
+DataMapper::setup(:default, ENV['DATABASE_URL'] || 'sqlite3:db.sqlite3')
 
 class Object
   def blank?
     respond_to?(:empty?) ? empty? : !self
   end
+end
+
+class Photo
+  include DataMapper::Resource
+  property :id, Serial
+  property :body, String
+  property :created_at, DateTime, :default => DateTime.now
+  auto_upgrade!
 end
 
 class Card
@@ -108,6 +120,30 @@ post '/' do
     result = Card.new(result).generate(params[k], v)
   end
 
-  content_type :jpg
-  return result.to_blob
+  image = Photo.create(:body => b64encode(result.to_blob))
+  Photo.all(:created_at.lt => (Time.now - 60 * 60)).each do |photo|
+    photo.destroy
+  end
+
+  redirect "/show/#{image.id}"
+end
+
+get '/show/:id' do
+  begin
+    image = Photo.get!(params[:id])
+    @id = image.id
+    erb :show
+  rescue
+    raise Sinatra::NotFound
+  end
+end
+
+get '/photo/:id' do
+  begin
+    image = Photo.get!(params[:id])
+    content_type :jpg
+    return decode64(image.body)
+  rescue
+    raise Sinatra::NotFound
+  end
 end
