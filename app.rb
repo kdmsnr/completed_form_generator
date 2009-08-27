@@ -21,7 +21,7 @@ end
 class Photo
   include DataMapper::Resource
   property :id, Serial
-  property :body, String
+  property :body, Text
   property :created_at, DateTime, :default => DateTime.now
   auto_upgrade!
 end
