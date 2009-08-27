@@ -4,7 +4,7 @@ require 'sinatra'
 require 'RMagick'
 require 'hpricot'
 require 'open-uri'
-require 'lib/my_magick'
+require 'lib/my_magick' # for RMagick 1.x
 
 include Magick
 
@@ -60,9 +60,8 @@ end
 def generate(result, user, opt)
   return result if user.empty?
 
-  src = ImageList.new(image_src(user)) {
-    self.background_color = "none"
-  }.first
+  src = ImageList.new(image_src(user)).first
+  src.background_color = "none"
   src.resize_to_fill!(CARD_X, CARD_Y).
     resize!(opt.resized_x, opt.resized_y).
     rotate!(opt.angle)
