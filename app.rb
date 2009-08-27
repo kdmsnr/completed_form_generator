@@ -103,7 +103,7 @@ post '/' do
   File.open("public/result/#{fname}.jpg", "w") do |f|
     f.write(result.to_blob)
   end
-  Thread.new{clean}
+#  Thread.new{clean}
 
   redirect "/result/#{fname}"
 end
