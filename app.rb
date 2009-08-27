@@ -27,12 +27,16 @@ class Card
   def generate(user, opt)
     return @image if user.blank?
 
-    src = ImageList.new(image_src(user)).first
-    src.background_color = "none"
-    src.resize_to_fill!(Card::X, Card::Y).
-      resize!(opt.resized_x, opt.resized_y).
-      rotate!(opt.angle)
-    @image = @image.composite(src, opt.x, opt.y, OverCompositeOp)
+    begin
+      src = ImageList.new(image_src(user)).first
+      src.background_color = "none"
+      src.resize_to_fill!(Card::X, Card::Y).
+        resize!(opt.resized_x, opt.resized_y).
+        rotate!(opt.angle)
+      @image = @image.composite(src, opt.x, opt.y, OverCompositeOp)
+    rescue
+      @image
+    end
   end
 end
 
@@ -53,6 +57,11 @@ rider_settings = {
   :blade =>  Setting.new(790, 419, Card::X, Card::Y, -10.3)
 }
 
+# http://subtech.g.hatena.ne.jp/secondlife/20061115/1163571997
+def valid_http_uri?(str)
+  URI.split(str).first == 'http' rescue false
+end
+
 def image_src(user)
   case user
   when "ruby-akr"
@@ -66,17 +75,21 @@ def image_src(user)
   when "ruby-matz"
     image = "images/matz.jpg"
   else
-    begin
-      twitter = Hpricot(open("http://twitter.com/#{user}"))
-      image = (twitter/"img#profile-image").map{|e| e['src'] }.first
-      if image.blank?
-        image = (twitter/"img.profile-img").map{|e| e['src'] }.first
-      end
-      if image.blank?
+    if valid_http_uri?(user)
+      image = user
+    else
+      begin
+        twitter = Hpricot(open("http://twitter.com/#{user}"))
+        image = (twitter/"img#profile-image").map{|e| e['src'] }.first
+        if image.blank?
+          image = (twitter/"img.profile-img").map{|e| e['src'] }.first
+          if image.blank?
+            image = "images/twitter_bigger.png"
+          end
+        end
+      rescue
         image = "images/twitter_bigger.png"
       end
-    rescue
-      image = "images/twitter_bigger.png"
     end
   end
   URI.encode(image)
