@@ -8,8 +8,6 @@ require 'lib/my_magick' # for RMagick 1.x
 
 include Magick
 
-RIDERS = %w(decade hibiki kabuto den_o kiva kuuga agito ryuki faiz blade)
-
 class Object
   def blank?
     respond_to?(:empty?) ? empty? : !self
@@ -89,7 +87,8 @@ get '/' do
 end
 
 post '/' do
-  params.delete_if {|k, v| !RIDERS.include?(k.to_s) }
+  filter = %w(decade hibiki kabuto den_o kiva kuuga agito ryuki faiz blade)
+  params.delete_if {|k, v| !filter.include?(k.to_s) }
 
   result = ImageList.new('images/decade.jpg')
   rider_settings.each do |k, v|
