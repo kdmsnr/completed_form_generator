@@ -35,15 +35,15 @@ end
 
 def image_src(user)
   case user
-  when "akr"
+  when "ruby-akr"
     image = "images/akr.jpg"
-  when "_why"
+  when "ruby-why"
     image = "images/_why.jpg"
-  when "_ko1"
+  when "ruby-ko1"
     image = "images/_ko1.jpg"
-  when "takahashim"
+  when "ruby-takahashim"
     image = "images/takahashim.jpg"
-  when "yukihiro_matz"
+  when "ruby-matz"
     image = "images/matz.jpg"
   else
     begin
