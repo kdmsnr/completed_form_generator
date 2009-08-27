@@ -4,6 +4,7 @@ require 'sinatra'
 require 'RMagick'
 require 'hpricot'
 require 'open-uri'
+require 'lib/my_magick'
 
 include Magick
 
