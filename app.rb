@@ -99,16 +99,19 @@ post '/' do
     result = generate(result, params[k], v)
   end
 
-  fname = Time.new.to_f
-  File.open("public/result/#{fname}.jpg", "w") do |f|
-    f.write(result.to_blob)
-  end
+  content_type :jpg
+  return result.to_blob
+
+#  fname = Time.new.to_f
+#  File.open("public/result/#{fname}.jpg", "w") do |f|
+#    f.write(result.to_blob)
+#  end
 #  Thread.new{clean}
 
-  redirect "/result/#{fname}"
+#  redirect "/result/#{fname}"
 end
 
-get '/result/:fname' do
-  @fname = params[:fname]
-  erb :result
-end
+#get '/result/:fname' do
+#  @fname = params[:fname]
+#  erb :result
+#end
