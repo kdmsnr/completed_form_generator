@@ -1,2 +1,5 @@
 hpricot
 sinatra
+do_sqlite3
+dm-core
+datamapper
