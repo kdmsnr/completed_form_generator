@@ -1,21 +1,13 @@
-<script><!--
+<script type="text/javascript"><!--
 function start_loading() {
   document.getElementById('loading').style.display = "inline";
 }
 //-->
 </script>
 
-<style type="text/css">
-#loading {
-    position:absolute;
-    top:50%;
-    left:50%;
-    display:none;
-}
-</style>
-
 <h2>twitterのidを入力してください</h2>
-<form method="post" action="/" onsubmit="start_loading()" />
+<form method="post" action="/" onsubmit="start_loading()" >
+<p>
   クウガ<input type="text" name="kuuga" /><br />
   アギト<input type="text" name="agito" /><br />
   龍騎<input type="text" name="ryuki" /><br />
@@ -27,11 +19,11 @@ function start_loading() {
   キバ<input type="text" name="kiva" /><br />
   ディケイド<input type="text" name="decade" /><br />
   <input type="submit" value="通りすがりの仮面ライダーだ！" />
+</p>
 </form>
-</div>
 
 <div id="loading">
-  <img src="loader.gif" />
+  <img src="loader.gif" alt="loading" />
 </div>
 
 <h2>特異点</h2>
