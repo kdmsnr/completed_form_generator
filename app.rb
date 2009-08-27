@@ -29,6 +29,12 @@ cards = {
   :blade =>  Card.new(790, 419, CARD_X, CARD_Y, -10.3)
 }
 
+class Object
+  def blank?
+    respond_to?(:empty?) ? empty? : !self
+  end
+end
+
 def decade
   ImageList.new('images/decade.jpg')
 end
@@ -49,7 +55,12 @@ def image_src(user)
     begin
       twitter = Hpricot(open("http://twitter.com/#{user}"))
       image = (twitter/"img#profile-image").map{|e| e['src'] }.first
-      image = "images/twitter_bigger.png" if image.empty?
+      if image.blank?
+        image = (twitter/"img.profile-img").map{|e| e['src'] }.first
+      end
+      if image.blank?
+        image = "images/twitter_bigger.png"
+      end
     rescue
       image = "images/twitter_bigger.png"
     end
@@ -58,7 +69,7 @@ def image_src(user)
 end
 
 def generate(result, user, opt)
-  return result if user.empty?
+  return result if user.blank?
 
   src = ImageList.new(image_src(user)).first
   src.background_color = "none"
