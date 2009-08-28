@@ -133,11 +133,11 @@ post '/photo' do
     result = Card.new(result).generate(params[k], v)
   end
 
-  Photo.all(:created_at.lt => (Time.now - 60 * 60 * 1)).each do |photo|
-    photo.destroy
-  end
   image = Photo.create(:body => b64encode(result.to_blob),
                        :created_at => DateTime.now)
+  Photo.all(:id.lt => (image.id - 50)).each do |photo|
+    photo.destroy
+  end
 
   redirect "/show/#{image.id}"
 end
