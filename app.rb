@@ -122,7 +122,6 @@ def h(str)
 end
 
 get '/' do
-  @count = Member.all.count
   erb :index
 end
 
