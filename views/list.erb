@@ -1,9 +1,10 @@
-<% unless @ids.blank? %>
+<% unless @photos.blank? %>
 <ul>
-<% @ids.each do |id| %>
+<% @photos.each do |photo| %>
   <li>
-    <a href="/show/<%=h id %>"><%= id %></a>
-    <form method="post" action="/photo/<%=h id %>" class="button-to">
+    <a href="/show/<%=h photo.id %>"><%=h photo.id %></a>
+    <%=h photo.created_at.strftime("at %Y/%m/%d %H:%M:%S") %>
+    <form method="post" action="/photo/<%=h photo.id %>" class="button-to">
       <div>
         <input type="hidden" name="_method" value="delete" />
         <input onclick="return confirm('削除しますか？');"

@@ -164,9 +164,9 @@ get '/show/:id' do
 end
 
 get '/list' do
-  @ids = []
+  @photos = []
   Photo.all(:order => [:id.desc]).each do |photo|
-    @ids << photo.id
+    @photos << photo
   end
   erb :list
 end
