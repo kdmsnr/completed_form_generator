@@ -52,7 +52,9 @@ function random_riders() {
 </div>
 
 <h2>ランダム表示設定</h2>
-<h3>ランダムで表示されるようtwitterユーザー名を登録する</h3>
+<h3>現在の登録twitterユーザー数</h3>
+<%=h @count %>
+<h3>ランダムで表示されるようにtwitterユーザー名を登録する</h3>
 <form method="post" action="/member">
   <p>
     twitterユーザー名: <input type="text" name="name" class="input" />
