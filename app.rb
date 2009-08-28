@@ -125,9 +125,9 @@ post '/photo' do
   end
 
   image = Photo.create(:body => b64encode(result.to_blob))
-  Photo.all(:created_at.lt => (Time.now - 60 * 60)).each do |photo|
-    photo.destroy
-  end
+#  Photo.all(:created_at.lt => (Time.now - 60 * 60)).each do |photo|
+#    photo.destroy
+#  end
 
   redirect "/show/#{image.id}"
 end
