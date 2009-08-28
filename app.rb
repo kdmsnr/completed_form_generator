@@ -196,7 +196,7 @@ get '/show/:id' do
     @id = image.id
     erb :show
   rescue
-    raise Sinatra::NotFound
+    redirect '/'
   end
 end
 
