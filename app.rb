@@ -202,7 +202,7 @@ end
 
 get '/list' do
   @photos = []
-  Photo.all(:order => [:id.desc]).each do |photo|
+  Photo.all(:order => [:id.desc], :limit => 50).each do |photo|
     @photos << photo
   end
   erb :list
