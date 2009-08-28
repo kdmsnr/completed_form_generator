@@ -33,11 +33,19 @@ class Photo
   auto_upgrade!
 end
 
+class Member
+  include DataMapper::Resource
+  property :id, Serial
+  property :name, String, :unique_index => :idx_member_name, :nullable => false
+  auto_upgrade!
+end
+
 class Card
   include Magick
 
-  X = 43.0
-  Y = 55.0
+  WIDTH = 43.0
+  HEIGHT = 55.0
+  RIDERS = %w(decade hibiki kabuto den_o kiva kuuga agito ryuki faiz blade)
 
   def initialize(image)
     @image = image
@@ -49,8 +57,8 @@ class Card
     begin
       src = ImageList.new(image_src(user)).first
       src.background_color = "none"
-      src.resize_to_fill!(Card::X, Card::Y).
-        resize!(opt.resized_x, opt.resized_y).
+      src.resize_to_fill!(Card::WIDTH, Card::HEIGHT).
+        resize!(opt.width, opt.height).
         rotate!(opt.angle)
       @image = @image.composite(src, opt.x, opt.y, OverCompositeOp)
     rescue
@@ -59,21 +67,21 @@ class Card
   end
 end
 
-Setting = Struct.new(:x, :y, :resized_x, :resized_y, :angle)
+Setting = Struct.new(:x, :y, :width, :height, :angle)
 rider_settings = {
-  :decade => Setting.new(564, 171, Card::X-1, Card::Y, -2.5),
+  :decade => Setting.new(564, 171, Card::WIDTH-1, Card::HEIGHT, -2.5),
 
-  :hibiki => Setting.new(402, 432, Card::X-18, Card::Y, 13.6),
-  :kabuto => Setting.new(434, 440, Card::X-14, Card::Y, 13.6),
-  :den_o =>  Setting.new(475, 447, Card::X-14, Card::Y, 13.4),
-  :kiva =>   Setting.new(514, 454, Card::X-10, Card::Y, 13.4),
+  :hibiki => Setting.new(402, 432, Card::WIDTH-18, Card::HEIGHT, 13.6),
+  :kabuto => Setting.new(434, 440, Card::WIDTH-14, Card::HEIGHT, 13.6),
+  :den_o =>  Setting.new(475, 447, Card::WIDTH-14, Card::HEIGHT, 13.4),
+  :kiva =>   Setting.new(514, 454, Card::WIDTH-10, Card::HEIGHT, 13.4),
 
-  :kuuga =>  Setting.new(567, 460, Card::X, Card::Y, 0),
+  :kuuga =>  Setting.new(567, 460, Card::WIDTH, Card::HEIGHT, 0),
 
-  :agito =>  Setting.new(622, 448, Card::X, Card::Y, -12),
-  :ryuki =>  Setting.new(676, 436, Card::X, Card::Y, -12),
-  :faiz =>   Setting.new(737, 428, Card::X, Card::Y, -10.3),
-  :blade =>  Setting.new(790, 419, Card::X, Card::Y, -10.3)
+  :agito =>  Setting.new(622, 448, Card::WIDTH, Card::HEIGHT, -12),
+  :ryuki =>  Setting.new(676, 436, Card::WIDTH, Card::HEIGHT, -12),
+  :faiz =>   Setting.new(737, 428, Card::WIDTH, Card::HEIGHT, -10.3),
+  :blade =>  Setting.new(790, 419, Card::WIDTH, Card::HEIGHT, -10.3)
 }
 
 def image_src(user)
@@ -118,15 +126,14 @@ get '/' do
 end
 
 post '/photo' do
-  filter = %w(decade hibiki kabuto den_o kiva kuuga agito ryuki faiz blade)
-  params.delete_if {|k, v| !filter.include?(k.to_s) }
+  params.delete_if {|k, v| !Card::RIDERS.include?(k.to_s) }
 
   result = ImageList.new('images/decade.jpg')
   rider_settings.each do |k, v|
     result = Card.new(result).generate(params[k], v)
   end
 
-  Photo.all(:created_at.lt => (Time.now - 60 * 60 * 3)).each do |photo|
+  Photo.all(:created_at.lt => (Time.now - 60 * 60 * 2)).each do |photo|
     photo.destroy
   end
   image = Photo.create(:body => b64encode(result.to_blob),
@@ -153,6 +160,35 @@ get '/photo/:id' do
   end
 end
 
+require 'json'
+get '/members.json' do
+  content_type :json
+  members =
+    Member.find_by_sql("SELECT * FROM members ORDER BY random() LIMIT 10")
+  alist = Card::RIDERS.zip(members.map{|m| m.name })
+  rider_user_mapping = Hash[*alist.flatten]
+
+  @members = JSON.unparse(rider_user_mapping)
+  erb :members, :layout => false
+end
+
+post '/member' do
+  begin
+    unless params[:name].blank?
+      Member.create(:name => params[:name].chomp)
+    end
+  ensure
+    redirect '/'
+  end
+end
+
+delete '/member' do
+  member = Member.first(:name => params[:name].chomp)
+  unless member.blank?
+    member.destroy
+  end
+  redirect '/'
+end
 
 get '/show/:id' do
   begin
