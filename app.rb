@@ -18,6 +18,13 @@ class Object
   end
 end
 
+module URI
+  # http://subtech.g.hatena.ne.jp/secondlife/20061115/1163571997
+  def self.valid_http_uri?(str)
+    URI.split(str).first == 'http' rescue false
+  end
+end
+
 class Photo
   include DataMapper::Resource
   property :id, Serial
@@ -69,11 +76,6 @@ rider_settings = {
   :blade =>  Setting.new(790, 419, Card::X, Card::Y, -10.3)
 }
 
-# http://subtech.g.hatena.ne.jp/secondlife/20061115/1163571997
-def valid_http_uri?(str)
-  URI.split(str).first == 'http' rescue false
-end
-
 def image_src(user)
   case user
   when "ruby-akr"
@@ -87,7 +89,7 @@ def image_src(user)
   when "ruby-matz"
     image = "images/matz.jpg"
   else
-    if valid_http_uri?(user)
+    if URI.valid_http_uri?(user)
       image = user
     else
       begin
