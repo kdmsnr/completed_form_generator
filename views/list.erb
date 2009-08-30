@@ -3,7 +3,7 @@
 <% @photos.each do |photo| %>
   <li>
     <a href="/show/<%=h photo.id %>"><%=h photo.id %></a>
-    <%=h photo.created_at.to_s %>
+    <%=h photo.created_at.to_s_jp %>
     <form method="post" action="/photo/<%=h photo.id %>" class="button-to">
       <div>
         <input type="hidden" name="_method" value="delete" />

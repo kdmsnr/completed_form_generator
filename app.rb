@@ -116,7 +116,7 @@ def h(str)
 end
 
 class DateTime
-  def to_s
+  def to_s_jp
     self.new_offset(Rational(9,24)).strftime("at %Y/%m/%d %H:%M:%S")
   end
 end
@@ -228,7 +228,7 @@ get '/list.rss' do
         item.link = server + "/show/#{photo.id}"
         item.title = "コンプリートフォーム##{photo.id}"
         item.date = Time.parse(photo.created_at.to_s)
-        item.content_encoded = %Q|<img src="#{server}/photo/#{photo.id}" />|
+        item.description = %Q|<img src="#{server}/photo/#{photo.id}" />|
       end
     end
   end
