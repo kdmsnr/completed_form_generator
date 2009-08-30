@@ -85,36 +85,29 @@ rider_settings = {
 }
 
 def image_src(user)
-  case user
-  when "ruby-akr"
-    image = "images/akr.jpg"
-  when "ruby-why"
-    image = "images/_why.jpg"
-  when "ruby-ko1"
-    image = "images/_ko1.jpg"
-  when "ruby-takahashim"
-    image = "images/takahashim.jpg"
-  when "ruby-matz"
-    image = "images/matz.jpg"
-  else
-    if URI.valid_http_uri?(user)
-      image = user
-    else
-      begin
-        twitter = Hpricot(open("http://twitter.com/#{user}"))
-        image = (twitter/"img#profile-image").map{|e| e['src'] }.first
-        if image.blank?
-          image = (twitter/"img.profile-img").map{|e| e['src'] }.first
-          if image.blank?
-            image = "images/twitter_bigger.png"
-          end
-        end
-      rescue
-        image = "images/twitter_bigger.png"
+  return URI.encode(user) if URI.valid_http_uri?(user)
+
+  exist = true
+  begin
+    twitter = Hpricot(open("http://twitter.com/#{user}"))
+    url = (twitter/"img#profile-image").map{|e| e['src'] }.first
+    if url.blank?
+      url = (twitter/"img.profile-img").map{|e| e['src'] }.first
+      if url.blank?
+        url = "images/twitter_bigger.png"
+        exist = false
       end
     end
+  rescue
+    url = "images/twitter_bigger.png"
+    exist = false
   end
-  URI.encode(image)
+
+  if exist & !Member.first(:name => user)
+    Member.create(:name => user) rescue true
+  end
+
+  URI.encode(url)
 end
 
 def h(str)
