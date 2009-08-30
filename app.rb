@@ -199,19 +199,15 @@ get '/show/:id' do
   end
 end
 
-def all_photos
-  Photo.all(:order => [:id.desc], :limit => 50)
-end
-
 get '/list' do
-  @photos = all_photos
+  @photos = Photo.all(:order => [:id.desc], :limit => 50)
   erb :list
 end
 
 require 'rss'
 require 'time'
 get '/list.rss' do
-  photos = all_photos
+  photos = Photo.all(:order => [:id.desc], :limit => 15)
   server = "http://#{env['SERVER_NAME']}"
   if env["SERVER_PORT"] && env["SERVER_PORT"].to_i != 80
     server += ":#{env["SERVER_PORT"]}"
