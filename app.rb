@@ -103,7 +103,7 @@ def image_src(user)
     exist = false
   end
 
-  if exist & !Member.first(:name => user)
+  if exist and !Member.first(:name => user)
     Member.create(:name => user) rescue true
   end
 
