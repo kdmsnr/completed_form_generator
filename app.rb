@@ -115,6 +115,12 @@ def h(str)
   Rack::Utils.escape_html(str)
 end
 
+class DateTime
+  def to_s
+    self.new_offset(Rational(9,24)).strftime("at %Y/%m/%d %H:%M:%S")
+  end
+end
+
 get '/' do
   erb :index
 end
@@ -207,21 +213,22 @@ require 'time'
 get '/list.rss' do
   photos = all_photos
   server = "http://#{env['SERVER_NAME']}"
-  server += ":#{env["SERVER_PORT"]}" if env["SERVER_PORT"]
+  if env["SERVER_PORT"] && env["SERVER_PORT"].to_i != 80
+    server += ":#{env["SERVER_PORT"]}"
+  end
 
   @rss = RSS::Maker.make("2.0") do |maker|
     maker.channel.about = server + "/"
     maker.channel.link = server + "/"
     maker.channel.title = "コンプリートフォームジェネレータ"
     maker.channel.description = "コンプリートフォームジェネレータ"
-    #maker.channel.date = 
+    maker.channel.date = Time.parse(photos.first.created_at.to_s)
     photos.each do |photo|
       maker.items.new_item do |item|
         item.link = server + "/show/#{photo.id}"
         item.title = "コンプリートフォーム##{photo.id}"
-        item.date = Time.parse(photo.created_at.new_offset(Rational(9,24)).strftime("at %Y/%m/%d %H:%M:%S"))
-        item.content_encoded =
-          %Q|<img src="#{server}/photo/#{photo.id}" />|
+        item.date = Time.parse(photo.created_at.to_s)
+        item.content_encoded = %Q|<img src="#{server}/photo/#{photo.id}" />|
       end
     end
   end
