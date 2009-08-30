@@ -7,6 +7,7 @@ require 'open-uri'
 require 'lib/my_magick' # for RMagick 1.x
 require 'dm-core'
 require 'base64'
+require 'json'
 
 include Magick
 
@@ -126,7 +127,7 @@ post '/photo' do
     result = Card.new(result).generate(params[k], v)
   end
 
-  image = Photo.create(:body => b64encode(result.to_blob),
+  image = Photo.create(:body => Base64.encode64(result.to_blob),
                        :created_at => DateTime.now)
   Photo.all(:id.lt => (image.id - 50)).each do |photo|
     photo.destroy
@@ -147,13 +148,12 @@ get '/photo/:id' do
   begin
     image = Photo.get!(params[:id])
     content_type :jpg
-    return decode64(image.body)
+    return Base64.decode64(image.body)
   rescue
     raise Sinatra::NotFound
   end
 end
 
-require 'json'
 get '/members.json' do
   content_type :json
   members =
@@ -193,7 +193,39 @@ get '/show/:id' do
   end
 end
 
+def all_photos
+  Photo.all(:order => [:id.desc], :limit => 50)
+end
+
 get '/list' do
-  @photos = Photo.all(:order => [:id.desc], :limit => 50)
+  @photos = all_photos
   erb :list
+end
+
+require 'rss'
+require 'time'
+get '/list.rss' do
+  photos = all_photos
+  server = "http://#{env['SERVER_NAME']}"
+  server += ":#{env["SERVER_PORT"]}" if env["SERVER_PORT"]
+
+  @rss = RSS::Maker.make("2.0") do |maker|
+    maker.channel.about = server + "/"
+    maker.channel.link = server + "/"
+    maker.channel.title = "コンプリートフォームジェネレータ"
+    maker.channel.description = "コンプリートフォームジェネレータ"
+    #maker.channel.date = 
+    photos.each do |photo|
+      maker.items.new_item do |item|
+        item.link = server + "/show/#{photo.id}"
+        item.title = "コンプリートフォーム##{photo.id}"
+        item.date = Time.parse(photo.created_at.new_offset(Rational(9,24)).strftime("at %Y/%m/%d %H:%M:%S"))
+        item.content_encoded =
+          %Q|<img src="#{server}/photo/#{photo.id}" />|
+      end
+    end
+  end
+
+  content_type 'application/rss+xml', :charset => 'utf-8'
+  erb :rss, :layout => :false
 end
