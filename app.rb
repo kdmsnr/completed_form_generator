@@ -194,10 +194,6 @@ get '/show/:id' do
 end
 
 get '/list' do
-  @photos = []
-  Photo.all(:order => [:id.desc], :limit => 50).each do |photo|
-    @photos << photo
-  end
+  @photos = Photo.all(:order => [:id.desc], :limit => 50)
   erb :list
 end
-
