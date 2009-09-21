@@ -10,8 +10,7 @@ require 'rss'
 require 'time'
 $LOAD_PATH << 'lib'
 require 'my_magick' # for RMagick 1.x
-require 'oauth'
-require 'twitter_oauth'
+#require 'twitter_oauth'
 
 include Magick
 
