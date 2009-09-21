@@ -9,7 +9,7 @@ require 'base64'
 require 'json'
 require 'rss'
 require 'time'
-require 'twitter_oauth'
+require 'lib/twitter_oauth'
 
 include Magick
 
