@@ -18,16 +18,25 @@ function random_riders() {
 </script>
 
 <p>
-  様々な画像を使って仮面ライダーディケイドのコンプリートフォームを生成します。<br />
-  以下のいずれかの方法で情報を入力して［通りすがりの仮面ライダーだ、覚えておけ！］ボタンを押してください。
+  様々な画像を使って仮面ライダーディケイドのコンプリートフォームを生成します。
 </p>
+
+<fieldset>
   <ol>
-    <li><del>基本的にはtwitterのidを入力してみてください</del>ログインしていないとアイコン画像が取得できなくなったので、もう使えないと思います。</li>
-    <li>画像のURLでもなんとかなるかもしれませんが、なんとかならないかもしれません</li>
-    <li><del>いちいち入力するのが面倒な人はランダム入力を使うと嬉しいかもしれません→</del>
-      <input type="button" onclick="random_riders();" value="ランダム入力" />
+    <li>twitterアカウントにログインします。→<a href="/connect">ログイン</a></li>
+    <li>以下のいずれかの方法で情報を入力します。
+      <ul>
+        <li>基本的にはtwitterのidを手入力してみてください。</li>
+        <li>画像のURLを手入力してもなんとかなるかもしれません。できるだけ頑張ります。</li>
+        <li>いちいち入力するのが面倒な人はランダム入力を使うと嬉しいかもしれません。→
+          <input type="button" onclick="random_riders();" value="ランダム入力" />
+        </li>
+      </ul>
     </li>
+    <li>［通りすがりの仮面ライダーだ、覚えておけ！］ボタンを押します。</li>
+    <li>エラーがなければ画像が表示されるはず！</li>
   </ol>
+</fieldset>
 
 <form id="form" method="post" action="/photo" onsubmit="start_loading()" >
 <p>

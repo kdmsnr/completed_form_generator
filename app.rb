@@ -2,12 +2,14 @@
 require 'rubygems'
 require 'sinatra'
 require 'RMagick'
-require 'hpricot'
 require 'open-uri'
 require 'lib/my_magick' # for RMagick 1.x
 require 'dm-core'
 require 'base64'
 require 'json'
+require 'rss'
+require 'time'
+require 'twitter_oauth'
 
 include Magick
 
@@ -17,12 +19,22 @@ class Object
   def blank?
     respond_to?(:empty?) ? empty? : !self
   end
+
+  def present?
+    !self.blank?
+  end
 end
 
 module URI
   # http://subtech.g.hatena.ne.jp/secondlife/20061115/1163571997
   def self.valid_http_uri?(str)
     URI.split(str).first == 'http' rescue false
+  end
+end
+
+class DateTime
+  def to_s_jp
+    self.new_offset(Rational(9,24)).strftime("at %Y/%m/%d %H:%M:%S")
   end
 end
 
@@ -52,11 +64,11 @@ class Card
     @image = image
   end
 
-  def generate(user, opt)
+  def generate(user, opt, client)
     return @image if user.blank?
 
     begin
-      src = ImageList.new(image_src(user)).first
+      src = ImageList.new(Card::image_src(user, client)).first
       src.background_color = "none"
       src.resize_to_fill!(Card::WIDTH, Card::HEIGHT).
         resize!(opt.width, opt.height).
@@ -65,6 +77,20 @@ class Card
     rescue
       @image
     end
+  end
+
+  private
+  def self.image_src(user, client)
+    return URI.encode(user) if URI.valid_http_uri?(user)
+
+    # get profile_image_url by using OAuth
+    url = client.show(user)['profile_image_url']
+
+    if url.present? and !Member.first(:name => user)
+      Member.create(:name => user) rescue true
+    end
+
+    URI.encode(url)
   end
 end
 
@@ -85,40 +111,23 @@ rider_settings = {
   :blade =>  Setting.new(790, 419, Card::WIDTH, Card::HEIGHT, -10.3)
 }
 
-def image_src(user)
-  return URI.encode(user) if URI.valid_http_uri?(user)
-
-  exist = true
-  begin
-    twitter = Hpricot(open("http://twitter.com/#{user}"))
-    url = (twitter/"img#profile-image").map{|e| e['src'] }.first
-    if url.blank?
-      url = (twitter/"img.profile-img").map{|e| e['src'] }.first
-      if url.blank?
-        url = "images/twitter_bigger.png"
-        exist = false
-      end
-    end
-  rescue
-    url = "images/twitter_bigger.png"
-    exist = false
-  end
-
-  if exist and !Member.first(:name => user)
-    Member.create(:name => user) rescue true
-  end
-
-  URI.encode(url)
+configure do
+  use Rack::Session::Cookie, :secret => Digest::SHA1.hexdigest(rand.to_s)
+  # set :sessions, true
+  @@config = YAML.load_file("config.yml") rescue nil || {
+    :consumer_key     => ENV['CONSUMER_KEY'],
+    :consumer_secret  => ENV['CONSUMER_SECRET']
+  }
 end
 
-def h(str)
-  Rack::Utils.escape_html(str)
-end
-
-class DateTime
-  def to_s_jp
-    self.new_offset(Rational(9,24)).strftime("at %Y/%m/%d %H:%M:%S")
-  end
+before do
+  @user = session[:user]
+  @client =
+    TwitterOAuth::Client.new(:consumer_key => @@config['consumer_key'],
+                             :consumer_secret => @@config['consumer_secret'],
+                             :token => session[:access_token],
+                             :secret => session[:secret_token])
+  @rate_limit_status = @client.rate_limit_status
 end
 
 get '/' do
@@ -126,11 +135,13 @@ get '/' do
 end
 
 post '/photo' do
+  redirect '/connect' unless @user
+
   params.delete_if {|k, v| !Card::RIDERS.include?(k.to_s) }
 
   result = ImageList.new('images/decade.jpg')
   rider_settings.each do |k, v|
-    result = Card.new(result).generate(params[k], v)
+    result = Card.new(result).generate(params[k], v, @client)
   end
 
   image = Photo.create(:body => Base64.encode64(result.to_blob),
@@ -204,8 +215,6 @@ get '/list' do
   erb :list
 end
 
-require 'rss'
-require 'time'
 get '/list.rss' do
   photos = Photo.all(:order => [:id.desc], :limit => 15)
   server = "http://#{env['SERVER_NAME']}"
@@ -231,4 +240,43 @@ get '/list.rss' do
 
   content_type 'application/rss+xml', :charset => 'utf-8'
   erb :rss, :layout => :false
+end
+
+get '/connect' do
+  request_token = @client.request_token(:oauth_callback => '')
+  session[:request_token] = request_token.token
+  session[:request_token_secret] = request_token.secret
+  redirect request_token.authorize_url.gsub('authorize', 'authenticate')
+end
+
+get '/auth' do
+  # Exchange the request token for an access token.
+  @access_token = @client.authorize(
+    session[:request_token],
+    session[:request_token_secret],
+    :oauth_verifier => params[:oauth_token]
+  )
+
+  if @client.authorized?
+    session[:access_token] = @access_token.token
+    session[:secret_token] = @access_token.secret
+    session[:user] = true
+  end
+
+  redirect '/'
+end
+
+get '/disconnect' do
+  session[:user] = nil
+  session[:request_token] = nil
+  session[:request_token_secret] = nil
+  session[:access_token] = nil
+  session[:secret_token] = nil
+  redirect '/'
+end
+
+helpers do
+  def h(str)
+    Rack::Utils.escape_html(str)
+  end
 end
