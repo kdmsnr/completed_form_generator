@@ -9,8 +9,9 @@ require 'base64'
 require 'json'
 require 'rss'
 require 'time'
-require 'lib/oauth'
-require 'lib/twitter_oauth'
+$LOAD_PATH << 'lib'
+require 'oauth'
+require 'twitter_oauth'
 
 include Magick
 
