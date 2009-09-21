@@ -111,7 +111,7 @@ rider_settings = {
   :faiz =>   Setting.new(737, 428, Card::WIDTH, Card::HEIGHT, -10.3),
   :blade =>  Setting.new(790, 419, Card::WIDTH, Card::HEIGHT, -10.3)
 }
-
+=begin
 configure do
   use Rack::Session::Cookie, :secret => Digest::SHA1.hexdigest(rand.to_s)
   # set :sessions, true
@@ -130,7 +130,7 @@ before do
                              :secret => session[:secret_token])
   @rate_limit_status = @client.rate_limit_status
 end
-
+=end
 get '/' do
   erb :index
 end
