@@ -4,13 +4,14 @@ require 'sinatra'
 require 'RMagick'
 require 'open-uri'
 require 'dm-core'
+require 'dm-ar-finders'
 require 'base64'
 require 'json'
 require 'rss'
 require 'time'
 $LOAD_PATH << 'lib'
 require 'my_magick' # for RMagick 1.x
-#require 'twitter_oauth'
+require 'twitter_oauth'
 
 include Magick
 
