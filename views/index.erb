@@ -1,3 +1,79 @@
-<a href="http://decade.capsctrl.com">
-moved
-</a>
+<!-- soundapi.setup.begin -->
+<script type="text/javascript" src="/swfobject.js"></script>
+<script type="text/javascript" src="/soundapi.js"></script>
+<!-- soundapi.setup.end -->
+
+<script type="text/javascript"><!--
+function start_loading() {
+  soundapi.playFile('final_kamen.mp3');
+  document.getElementById('loading').style.display = "inline";
+}
+
+function random_riders() {
+  $.get("/members.json", function(data) {
+    $('#form').deserialize($.evalJSON(data));
+  });
+}
+//-->
+</script>
+
+<p>
+  様々な画像を使って仮面ライダーディケイドのコンプリートフォームを生成します。
+</p>
+
+<fieldset>
+  <ol>
+    <li>twitterアカウントにログインします。→<a href="/connect">ログイン</a></li>
+    <li>以下のいずれかの方法で情報を入力します。
+      <ul>
+        <li>基本的にはtwitterのidを手入力してみてください。</li>
+        <li>画像のURLを手入力してもなんとかなるかもしれません。できるだけ頑張ります。</li>
+        <li>いちいち入力するのが面倒な人はランダム入力を使うと嬉しいかもしれません。→
+          <input type="button" onclick="random_riders();" value="ランダム入力" />
+        </li>
+      </ul>
+    </li>
+    <li>［通りすがりの仮面ライダーだ、覚えておけ！］ボタンを押します。</li>
+    <li>エラーがなければ画像が表示されるはず！</li>
+  </ol>
+</fieldset>
+
+<form id="form" method="post" action="/photo" onsubmit="start_loading()" >
+<p>
+  クウガ<input type="text" name="kuuga" class="input" /><br />
+  アギト<input type="text" name="agito" class="input" /><br />
+  龍騎<input type="text" name="ryuki" class="input" /><br />
+  555<input type="text" name="faiz" class="input" /><br />
+  ブレイド<input type="text" name="blade" class="input" /><br />
+  響鬼<input type="text" name="hibiki" class="input" /><br />
+  カブト<input type="text" name="kabuto" class="input" /><br />
+  電王<input type="text" name="den_o" class="input" /><br />
+  キバ<input type="text" name="kiva" class="input" /><br />
+  ディケイド<input type="text" name="decade" class="input" /><br />
+
+  <input type="submit" value="通りすがりの仮面ライダーだ、覚えておけ！" /><br />
+  （運が良ければ音が鳴ります）
+</p>
+</form>
+
+<div id="loading">
+  <img src="loader.gif" alt="loading" />
+</div>
+
+<h2>ランダム表示設定</h2>
+<h3>ランダムで表示されるようにtwitterユーザー名を登録する</h3>
+<form method="post" action="/member">
+  <p>
+    twitterユーザー名: <input type="text" name="name" class="input" />
+    <input type="submit" value="登録" />
+  </p>
+</form>
+
+<h3>登録されたtwitterユーザー名を削除する</h3>
+<form method="post" action="/member">
+  <p>
+    <input type="hidden" name="_method" value="delete" />
+    twitterユーザー名: <input type="text" name="name" class="input" />
+    <input type="submit" value="削除" />
+  </p>
+</form>
