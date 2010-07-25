@@ -158,6 +158,11 @@ end
 delete '/photo/:id' do
   begin
     Photo.get!(params[:id]).destroy
+    image_file_path = File.exapnd_path("tmp/#{params[:id]}.jpg")
+
+    if File.exist?(image_file_path)
+      File.delete(image_file_path)
+    end
   ensure
     redirect '/list'
   end
@@ -165,7 +170,17 @@ end
 
 get '/photo/:id' do
   begin
+    image_file_path = File.exapnd_path("tmp/#{params[:id]}.jpg")
+    if File.exist?(image_file_path)
+      content_type :jpg
+      return File.open(image_file_path)
+    end
+
     image = Photo.get!(params[:id])
+    File.open(image_file_path, "w") do |file|
+      file.write(image.body)
+    end
+
     content_type :jpg
     return Base64.decode64(image.body)
   rescue
